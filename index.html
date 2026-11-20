@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kindification</title>
+<style>
+:root{--ink:#262626;--soft:#595959;--y:#f4b82e;--o:#c85a0c;--od:#a84708;--f:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color-scheme:light}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:#fff;color:var(--ink);font:1.2rem/1.6 var(--f);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4.5rem 1.25rem 3rem}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.lang{position:absolute;top:1.25rem;right:1.25rem;display:flex;gap:.25rem;font-size:1rem}
+.lang button{background:none;border:0;border-bottom:2px solid transparent;padding:.25rem .5rem;color:var(--soft)}
+.lang [aria-pressed=true]{color:var(--ink);border-color:var(--o)}
+main{width:100%;max-width:40rem;text-align:center}
+h1{font-weight:400;font-size:clamp(2.25rem,7vw,4rem);line-height:1.05;margin:0;overflow-wrap:anywhere}
+.rule{display:block;width:4.5rem;height:4px;margin:1.25rem auto 1.5rem;border-radius:4px;background:linear-gradient(90deg,var(--y),var(--o))}
+.entry{font-style:italic;color:var(--soft);font-size:1rem;margin:0 0 .5rem}
+.def{font-size:clamp(1.4rem,3.4vw,1.9rem);line-height:1.4;margin:0 auto;max-width:32rem;text-wrap:balance}
+.ex{font-style:italic;font-size:clamp(1.2rem,3vw,1.45rem);line-height:1.35;color:var(--od);margin:2rem auto 0;max-width:30rem;min-height:4.2rem;display:flex;align-items:center;justify-content:center;transition:opacity .9s;text-wrap:balance}
+.ex.out{opacity:0}
+.actions{display:flex;flex-wrap:wrap;gap:.9rem;justify-content:center;margin-top:2.25rem}
+.btn{padding:.8rem 1.5rem;border-radius:999px;border:2px solid var(--o);background:var(--o);color:#fff}
+.btn:hover{background:var(--od);border-color:var(--od)}
+.btn.alt{background:var(--y);border-color:var(--y);color:var(--ink)}
+.btn.alt:hover{background:#ffc94d;border-color:#ffc94d}
+.btn:disabled{opacity:.6;cursor:default}
+dialog{border:0;padding:0;border-radius:14px;width:min(32rem,calc(100% - 2rem));color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(38,38,38,.5)}
+.sheet{padding:1.75rem 1.5rem 1.5rem;border-top:6px solid var(--y)}
+h2{font-weight:400;font-size:2rem;line-height:1.15;margin:0 0 .4rem}
+.lead{margin:0 0 1.25rem;color:var(--soft);font-size:1.05rem;line-height:1.45}
+label{display:block;font-size:1rem;margin:0 0 .25rem}
+input,textarea{width:100%;font-size:1.05rem;color:var(--ink);background:#fff;border:1.5px solid #c9c9c9;border-radius:8px;padding:.6rem .75rem;margin-bottom:1rem}
+textarea{min-height:7rem;resize:vertical}
+input:focus-visible,textarea:focus-visible{outline:3px solid var(--y);outline-offset:1px;border-color:var(--o)}
+label.check{display:flex;gap:.6rem;align-items:center}
+label.check input{width:1.15rem;height:1.15rem;margin:0;accent-color:var(--o)}
+.row{display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap;align-items:center}
+.link{background:none;border:0;color:var(--soft);text-decoration:underline;padding:.5rem;font-size:1rem}
+.msg{min-height:1.5rem;margin:1rem 0 .75rem;font-size:1rem}
+.msg.ok{color:#2f6b2f}.msg.err{color:#a12a14}
+.combo{position:relative}
+.combo input{padding-right:2.4rem}
+.chev{display:flex;align-items:center;justify-content:center;position:absolute;right:.35rem;top:.3rem;width:2rem;height:2.1rem;border:0;background:none;color:var(--soft);padding:0}
+.chev:hover{color:var(--o)}
+.combo-list{position:absolute;left:0;right:0;top:calc(100% - .85rem);z-index:5;margin:0;padding:.3rem;list-style:none;max-height:11.5rem;overflow-y:auto;background:#fff;border:1.5px solid var(--o);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.14)}
+.combo-list li{padding:.45rem .7rem;border-radius:6px;font-size:1.05rem;line-height:1.3;cursor:pointer}
+.combo-list [aria-selected=true]{background:#fdeec2}
+.combo-list .none{color:var(--soft);font-style:italic;cursor:default}
+@media(prefers-reduced-motion:reduce){.ex{transition:none}}
+</style>
+</head>
+<body>
+<div class="lang" role="group" aria-label="Language">
+<button type="button" id="en" aria-pressed="true">EN</button><button type="button" id="fr" aria-pressed="false">FR</button>
+</div>
+<main>
+<h1 data-i="title">Kindification</h1>
+<span class="rule" aria-hidden="true"></span>
+<p class="entry" data-i="entry">kindification, n.</p>
+<p class="def" data-i="def">Ideas that make our world a little kinder.</p>
+<p class="ex" id="ex" aria-live="off">A piano in a train station.</p>
+<div class="actions">
+<button class="btn" id="bi" type="button" data-i="bi">Submit an idea</button>
+<button class="btn alt" id="bn" type="button" data-i="bn">Stay in the know</button>
+</div>
+</main>
+
+<dialog id="d" aria-labelledby="dt">
+<form class="sheet" id="f" novalidate>
+<h2 id="dt"></h2>
+<p class="lead" id="dl"></p>
+<div id="io"><label for="ix" data-i="idea">Your idea</label><textarea id="ix"></textarea></div>
+<label for="nm" data-i="name">Full name</label>
+<input id="nm" type="text" autocomplete="name">
+<label for="co" data-i="country">Country</label>
+<input id="co" type="text" autocomplete="off">
+<label for="em" data-i="email">Email</label>
+<input id="em" type="email" autocomplete="email">
+<label class="check" id="nr" for="nl"><input id="nl" type="checkbox"><span data-i="also">I would also like to receive the newsletter</span></label>
+<p class="msg" id="msg" role="status" aria-live="polite"></p>
+<div class="row"><button type="button" class="link" id="cl" data-i="close">Close</button><button type="submit" class="btn" id="send"></button></div>
+</form>
+</dialog>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const T={en:{title:"Kindification",entry:"kindification, n.",def:"Ideas that make our world a little kinder.",bi:"Submit an idea",bn:"Stay in the know",
+idea:"Your idea",name:"Full name",country:"Country",email:"Email",also:"I would also like to receive the newsletter",close:"Close",
+iT:"Your idea",iL:"An everyday experience made a little kinder by an idea. Tell us about it in a few lines.",iS:"Send my idea",
+nT:"Stay in the know",nL:"News about the project and the book, when there is some.",nS:"Keep me posted",
+sending:"Sending…",iOk:"Thank you, we received your idea.",nOk:"Thank you, you will get the next news.",fail:"Sending failed. Check your connection and try again.",
+eIdea:"Describe your idea in a few words before sending.",eName:"Enter your full name.",eCo:"Enter your country.",eMail:"Enter a valid email address, for example name@example.com.",
+none:"No match, you can type your own."},
+fr:{title:"Sympafication",entry:"sympafication, n. f.",def:"Les idées qui rendent notre monde un peu plus sympathique.",bi:"Soumettre une idée",bn:"Suivre le projet",
+idea:"Votre idée",name:"Prénom et nom",country:"Pays",email:"Mail",also:"Je souhaite aussi recevoir la newsletter",close:"Fermer",
+iT:"Votre idée",iL:"Une expérience du quotidien rendue plus sympathique par une idée. Racontez-la en quelques lignes.",iS:"Envoyer mon idée",
+nT:"Suivre le projet",nL:"Des nouvelles du projet et du livre, quand il y en a.",nS:"Je suis le projet",
+sending:"Envoi en cours…",iOk:"Merci, votre idée est bien reçue.",nOk:"Merci, vous recevrez les prochaines nouvelles.",fail:"L'envoi n'a pas abouti. Vérifiez votre connexion, puis réessayez.",
+eIdea:"Décrivez votre idée en quelques mots avant d'envoyer.",eName:"Indiquez votre prénom et votre nom.",eCo:"Indiquez votre pays.",eMail:"Saisissez une adresse mail valide, par exemple prenom@exemple.com.",
+none:"Aucun résultat, vous pouvez saisir le vôtre."}};
+const EX=[["A piano in a train station.","Un piano dans une gare."],["A medal you share with others.","Une médaille que l'on partage."],
+["A community fridge anyone can fill or empty.","Un frigo solidaire que chacun peut remplir ou vider."],
+["A ring on a public bin to leave deposit bottles for those who need them.","Un anneau sur une poubelle pour laisser ses bouteilles consignées à ceux qui en ont besoin."],
+["A video call that lends your eyes to someone who cannot see.","Un appel vidéo pour prêter ses yeux à quelqu'un qui n'y voit pas."],
+["Rounding up your bill at the checkout to give the difference.","Arrondir sa caisse pour donner la différence."]];
+const CODES="AD AE AF AG AI AL AM AO AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GT GU GW GY HK HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG US UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW".split(" ");
+
+let lang=/^fr/i.test(navigator.language||"")?"fr":"en",mode="i",ei=0,names=[];
+const t=k=>T[lang][k];
+
+function setMode(m){mode=m;$("io").hidden=$("nr").hidden=m!="i";$("dt").textContent=t(m+"T");$("dl").textContent=t(m+"L");$("send").textContent=t(m+"S")}
+function apply(){
+document.documentElement.lang=lang;
+document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));
+$("en").setAttribute("aria-pressed",lang=="en");$("fr").setAttribute("aria-pressed",lang=="fr");
+$("ex").textContent=EX[ei][lang=="fr"?1:0];
+try{const dn=new Intl.DisplayNames([lang],{type:"region"});
+names=CODES.map(c=>{try{return dn.of(c)}catch(e){}}).filter(n=>n&&n.length>2).sort((a,b)=>a.localeCompare(b,lang))}catch(e){}
+setMode(mode);$("msg").textContent="";
+}
+$("en").onclick=()=>{lang="en";apply()};
+$("fr").onclick=()=>{lang="fr";apply()};
+setInterval(()=>{$("ex").classList.add("out");setTimeout(()=>{ei=(ei+1)%EX.length;$("ex").textContent=EX[ei][lang=="fr"?1:0];$("ex").classList.remove("out")},950)},5200);
+
+const d=$("d");
+const open=m=>{setMode(m);$("msg").textContent="";try{d.showModal()}catch(e){d.setAttribute("open","")}};
+$("bi").onclick=()=>open("i");$("bn").onclick=()=>open("n");
+$("cl").onclick=()=>d.close();
+d.onclick=e=>{if(e.target===d)d.close()};
+
+/* country combobox */
+const co=$("co"),box=document.createElement("div"),ul=document.createElement("ul"),chev=document.createElement("button");
+box.className="combo";co.before(box);box.append(co,chev,ul);
+chev.type="button";chev.tabIndex=-1;chev.className="chev";chev.setAttribute("aria-hidden","true");
+chev.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+ul.className="combo-list";ul.id="cl-list";ul.hidden=true;ul.setAttribute("role","listbox");
+co.setAttribute("role","combobox");co.setAttribute("aria-controls","cl-list");co.setAttribute("aria-autocomplete","list");co.setAttribute("aria-expanded","false");
+let shown=[],act=-1;
+const norm=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();
+const setOpen=o=>{ul.hidden=!o;co.setAttribute("aria-expanded",o);if(!o)act=-1};
+const pick=i=>{co.value=shown[i];setOpen(false)};
+function show(all){
+const q=all?"":norm(co.value),a=[],b=[];
+names.forEach(n=>{const k=norm(n).indexOf(q);k==0||!q?a.push(n):k>0&&b.push(n)});
+shown=a.concat(b);act=-1;ul.innerHTML="";
+if(!shown.length){const li=document.createElement("li");li.className="none";li.textContent=t("none");ul.append(li)}
+shown.forEach((n,i)=>{const li=document.createElement("li");li.setAttribute("role","option");li.textContent=n;li.onmousedown=e=>{e.preventDefault();pick(i)};ul.append(li)});
+setOpen(true);
+}
+const mark=()=>{[...ul.children].forEach((li,i)=>li.setAttribute("aria-selected",i==act));ul.children[act]?.scrollIntoView({block:"nearest"})};
+co.oninput=()=>show(false);
+co.onclick=()=>{if(ul.hidden)show(!co.value)};
+co.onblur=()=>setOpen(false);
+chev.onmousedown=e=>{e.preventDefault();if(ul.hidden){co.focus();show(true)}else setOpen(false)};
+co.onkeydown=e=>{
+if(e.key=="ArrowDown"){e.preventDefault();if(ul.hidden)show(!co.value);if(shown.length){act=Math.min(act+1,shown.length-1);mark()}}
+else if(e.key=="ArrowUp"&&!ul.hidden){e.preventDefault();act=Math.max(act-1,0);mark()}
+else if(e.key=="Enter"&&!ul.hidden&&act>=0){e.preventDefault();pick(act)}
+else if(e.key=="Escape"&&!ul.hidden){e.preventDefault();e.stopPropagation();setOpen(false)}
+else if(e.key=="Tab")setOpen(false);
+};
+
+/* submit */
+const ENDPOINT="https://script.google.com/macros/s/AKfycbzTApMH2tkL0lu_wYshmlc6wdqQyS3eiweFZOdM0ceqKnVtGvEYg36oRlhYauFj9vOK/exec";
+const clip=(id,n)=>$(id).value.trim().slice(0,n);
+$("f").onsubmit=e=>{
+e.preventDefault();
+const r={nom:clip("nm",120),pays:clip("co",80),mail:clip("em",200),newsletter:mode=="n"||$("nl").checked?"Oui":"Non",idee:mode=="i"?clip("ix",2000):""};
+const err=mode=="i"&&r.idee.length<5?"eIdea":!r.nom?"eName":!r.pays?"eCo":!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.mail)?"eMail":"";
+const msg=$("msg"),b=$("send");
+if(err){msg.className="msg err";msg.textContent=t(err);return}
+b.disabled=true;msg.className="msg";msg.textContent=t("sending");
+Promise.resolve().then(()=>{if(!ENDPOINT.startsWith("https://"))throw 0;
+return fetch(ENDPOINT,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(r)})
+}).then(()=>{msg.className="msg ok";msg.textContent=t(mode+"Ok");$("f").reset()})
+.catch(()=>{msg.className="msg err";msg.textContent=t("fail")})
+.finally(()=>b.disabled=false);
+};
+
+apply();
+})();
+</script>
+</body>
+</html>
